@@ -3,6 +3,8 @@
 // Declare syntax version
 nextflow.enable.dsl=2
 
+include workflow.config
+
 // These can be overwritten by passing --<param_name> in the command line
 params = {
     clean_fasta_opts = "-u"

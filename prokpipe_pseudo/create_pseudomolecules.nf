@@ -3,6 +3,9 @@
 // Declare syntax version
 nextflow.enable.dsl=2
 
+include workflow.config
+
+
 params.contig_input = "/path/to/contigs.fasta"
 params.accession_input = "/path/to/accessions.txt"
 params.abbreviation = "test"
