@@ -9,10 +9,6 @@ include {clean_fasta} from "./clean_fasta"
 include {create_pseudomolecules} from "./create_pseudomolecules"
 include {pmarks2bsml} from "./pmarks2bsml"
 
-params.fasta_file = "$projectDir/input.fa"
-params.fasta_list = "$projectDir/input.fa.list"
-
-params.accession_file = "$projectDir/accession.txt"
 params.abbreviation = "test"    // Codename to use in output files
 
 process clean_fasta {
