@@ -3,7 +3,8 @@
 // Declare syntax version
 nextflow.enable.dsl=2
 
-include workflow.config
+includeConfig workflow.config
+
 include {clean_fasta} from "./clean_fasta"
 include {create_pseudomolecules} from "./create_pseudomolecules"
 include {pmarks2bsml} from "./pmarks2bsml"

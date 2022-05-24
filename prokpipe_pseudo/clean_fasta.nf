@@ -3,7 +3,7 @@
 // Declare syntax version
 nextflow.enable.dsl=2
 
-include workflow.config
+includeConfig workflow.config
 
 // These can be overwritten by passing --<param_name> in the command line
 params = {
