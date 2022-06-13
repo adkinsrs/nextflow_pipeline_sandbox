@@ -14,13 +14,13 @@ process run_pmarks2bsml {
         val abbr
 
     output:
-        path "${fasta_input.basename}.pmarks.bsml"
+        path "${fasta_input.baseName}.pmarks.bsml"
 
     """
     /usr/bin/env perl $params.bin_dir/pmarks2bsml \
         --fasta_input=${fasta_input} \
         --input_file=${fasta_input}.pmarks \
-        --output=${fasta_input.basename}.pmarks.bsml \
+        --output=${fasta_input.baseName}.pmarks.bsml \
         --project=${abbr} \
         --id_repository=${params.id_repository} \
     """

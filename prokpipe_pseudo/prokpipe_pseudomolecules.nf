@@ -29,11 +29,11 @@ process pmarks2bsml {
 
 workflow {
     // In Ergatis, we could pass a file, a .list of files, or a directory.
-    fasta_input_ch = channel.fromPath(params.fasta_file, checkIfExists=false, followLinks=true)
-        .set{file_chunks_ch}
-    fasta_list_ch = channel.fromPath(params.fasta_list, checkIfExists=false, followLinks=true)
-        .splitText()
-        .set{file_chunks_ch}
+    file_chunks_ch = channel.fromPath(params.fasta_file, checkIfExists:false, followLinks:true)
+    if (! file_chunks_ch) {
+        file_chunks_ch = channel.fromPath(params.fasta_list, checkIfExists:true, followLinks:true).splitText()
+    }
+
     main:
         // Executes per file
         clean_fasta(
