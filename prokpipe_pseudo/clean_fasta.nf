@@ -9,8 +9,7 @@ params.nucleotide = true
 nuc = params.nucleotide ? "T" : "F"
 
 process remove_cr_line_breaks {
-    outdir = file("$workDir/clean_fasta")
-    outdir.mkdir()
+    outdir = "$workDir/clean_fasta"
 
     publishDir outdir, mode: 'symlink', failOnError: true
 
@@ -19,7 +18,7 @@ process remove_cr_line_breaks {
     output:
         // simpleName - https://www.nextflow.io/docs/latest/script.html#check-file-attributes
         // Note will not work if file basename contains periods
-        path "${input_file.simpleName}.tmp.fa"
+        path "${input_file.simpleName}.tmp.fa", glob: false
 
     """
     /usr/bin/env perl -p -w -e "s/\r//g" $input_file > "${input_file.simpleName}.tmp.fa"
@@ -29,41 +28,38 @@ process remove_cr_line_breaks {
 process run_clean_fasta {
     outdir = "$workDir/clean_fasta"
 
-    scratch true
     publishDir outdir, mode: 'symlink', failOnError: true
 
     input:
         path fasta_input
 
     output:
-        path "${fasta_input.simpleName}.fa"
+        path "${fasta_input.simpleName}.fa", glob: false
 
     """
     /usr/bin/env perl ${params.bin_dir}/clean_fasta.pl \
-    ${params.clean_fasta_opts} \
-    $fasta_input \
-    --output=${fasta_input.simpleName}.fa \
+        ${params.clean_fasta_opts} \
+        $fasta_input \
+        --output=${fasta_input.simpleName}.fa
     """
 }
 
 process replace_gaps_in_nucleotides {
-    outdir = file("${workDir}/final_clean")
-    outdir.mkdir()
+    outdir = "${workDir}/final_clean"
 
-    scratch true
     publishDir outdir, mode: 'symlink', failOnError: true
 
     input:
         path fasta_input
 
     output:
-        path "${fasta_input.simpleName}.fa"
+        path "${fasta_input.simpleName}.fa", glob: false
 
     """
     /usr/bin/env perl ${params.bin_dir}/replace_nuc_gaps.pl \
         --nucleotide=$nuc \
         --input_file=$fasta_input \
-        --output_file=${fasta_input.simpleName}.fa \
+        --output_file=${fasta_input.simpleName}.fa
     """
 }
 

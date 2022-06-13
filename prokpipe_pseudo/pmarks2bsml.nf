@@ -3,8 +3,6 @@
 // Declare syntax version
 nextflow.enable.dsl=2
 
-includeConfig workflow.config
-
 params.abbreviation = "test"
 
 process run_pmarks2bsml {
@@ -14,13 +12,13 @@ process run_pmarks2bsml {
         val abbr
 
     output:
-        path "${fasta_input.baseName}.pmarks.bsml"
+        path "${fasta_input.simpleName}.pmarks.bsml"
 
     """
     /usr/bin/env perl $params.bin_dir/pmarks2bsml \
         --fasta_input=${fasta_input} \
         --input_file=${fasta_input}.pmarks \
-        --output=${fasta_input.baseName}.pmarks.bsml \
+        --output=${fasta_input.simpleName}.pmarks.bsml \
         --project=${abbr} \
         --id_repository=${params.id_repository} \
     """
@@ -39,11 +37,10 @@ workflow pmarks2bsml {
 
 workflow {
     // In Ergatis, we could pass a file, a .list of files, or a directory.
-    fasta_input_ch = channel.fromPath(params.fasta_file, checkIfExists=false, followLinks=true)
-        .set{file_chunks_ch}
-    fasta_list_ch = channel.fromPath(params.fasta_list, checkIfExists=false, followLinks=true)
-        .splitText()
-        .set{file_chunks_ch}
+    file_chunks_ch = channel.fromPath(params.fasta_file, checkIfExists:false, followLinks:true)
+    if (! file_chunks_ch) {
+        file_chunks_ch = channel.fromPath(params.fasta_list, checkIfExists:true, followLinks:true).splitText()
+    }
 
     abbreviation = channel.value(params.abbreviation)
 
