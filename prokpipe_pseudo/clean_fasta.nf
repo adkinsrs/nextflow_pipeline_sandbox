@@ -53,13 +53,13 @@ process replace_gaps_in_nucleotides {
         path fasta_input
 
     output:
-        path "${fasta_input.simpleName}.fa", glob: false
+        path "${fasta_input.simpleName}.cleaned.fa", glob: false
 
     """
     /usr/bin/env perl ${params.bin_dir}/replace_nuc_gaps.pl \
         --nucleotide=$nuc \
         --input_file=$fasta_input \
-        --output_file=${fasta_input.simpleName}.fa
+        --output_file=${fasta_input.simpleName}.cleaned.fa
     """
 }
 
