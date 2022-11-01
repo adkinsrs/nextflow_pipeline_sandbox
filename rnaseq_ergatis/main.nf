@@ -7,10 +7,11 @@ include {hisat2_build} from "./hisat2_build"
 include {samtools_reference_index} from "./samtools_reference_index"
 include {create_paired_list_file} from "./create_paired_list_file"
 
+/*
 process hisat2_build {
     input:
         path ref_fasta_file
-        path hisat2_bin_dir
+        val hisat2_bin_dir
     output:
         path hisat2_build_index
         val prefix
@@ -20,7 +21,7 @@ process hisat2_build {
 process samtools_reference_index {
     input:
         path ref_fasta_file
-        path samtools_bin_dir
+        val samtools_bin_dir
     output:
         path samtools_index
 
@@ -33,6 +34,7 @@ process create_paired_list_file {
     output:
         path paired_list_file
 }
+*/
 
 workflow {
     // In Ergatis, we could pass a file, a .list of files, or a directory.

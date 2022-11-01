@@ -15,16 +15,16 @@ process run_fastqc_stats {
     publishDir outdir, mode: 'symlink', failOnError: true
 
     input:
-        tuple file(seq_file1), file(seq_file2)
+        tuple path(seq_file1), path(seq_file2)
     output:
         path "*.per_base_quality.png", glob: true, emit: per_base_quality
         path "*.sequence_length_distribution.png", glob: true, emit: sequence_length_distribution
 
     """
     /usr/bin/env perl ${params.bin_dir}/fastqc_stats.pl \
-        --seq1file=${seq_file1} \
-        --seq2file=${seq_file2} \
-        --outdir=${outdir} \
+        --seq1file=\$PWD/${seq_file1} \
+        --seq2file=\$PWD/${seq_file2} \
+        --outdir=\$PWD \
         --fastqc_bin_dir=${params.fastq_bin_dir}
         --args=${params.other_params}
     """

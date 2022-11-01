@@ -22,16 +22,17 @@ process run_create_paired_list_file {
 
     """
     /usr/bin/env perl ${params.bin_dir}/create_paired_list_file.pl \
-        --listfile1=${list_file1} \
-        --listfile2=${list_file2} \
+        --listfile1=\$PWD/${list_file1} \
+        --listfile2=\$PWD/${list_file2} \
         --samplefile= ${params.sample_info} \
-        --outdir=${outdir} \
+        --outdir=\$PWD \
         ${params.other_args}
     """
 }
 
 workflow create_paired_list_file {
-    take: list_file1, list_file2
+    take: list_file1
+    take: list_file2
     main:
         run_create_paired_list_file(
             list_file1

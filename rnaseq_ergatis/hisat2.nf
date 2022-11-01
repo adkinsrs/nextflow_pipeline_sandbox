@@ -88,8 +88,8 @@ process run_hisat {
         --minins=${params.min_fragment_len} \
         --maxins=${params.max_fragment_len} \
         --no-unal=${params.suppress_unalignments} \
-        --outdir=${outdir} \
-        --prefix=${ref_fasta_file.simpleName} \
+        --outdir=\$PWD \
+        --prefix=${ref_fasta_file.baseName} \
         --num-threads=${params.num_threads} \
         --hisat2_bin_dir=${hisat2_bin_dir} \
         --samtools_bin_dir=${samtools_bin_dir} \

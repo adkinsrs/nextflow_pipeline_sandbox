@@ -14,22 +14,23 @@ process run_samtools_reference_index {
 
     input:
         path ref_fasta_file
-        path samtools_bin_dir
+        val samtools_bin_dir
     output:
-        path "${ref_fasta_file.simpleName}.fa.fai", glob: false
+        path "${ref_fasta_file.baseName}.fa.fai", glob: false
 
 
     """
     /usr/bin/env perl ${params.bin_dir}/samtools_reference_index.pl \
-        --reffile=${ref_fasta_file} \
-        --outdir=${outdir} \
+        --reffile=\$PWD/${ref_fasta_file} \
+        --outdir=\$PWD \
         --samtools_bin_dir=${samtools_bin_dir} \
         ${params.other_args}
     """
 }
 
 workflow samtools_reference_index {
-    take: ref_fasta_file, samtools_bin_dir
+    take: ref_fasta_file
+    take: samtools_bin_dir
     main:
         run_samtools_reference_index(
             ref_fasta_file
