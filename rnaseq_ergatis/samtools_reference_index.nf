@@ -19,12 +19,13 @@ process run_samtools_reference_index {
         path ref_fasta_file
         val samtools_bin_dir
     output:
-        path "${ref_fasta_file.baseName}.fa.fai", glob: false
+        path "index/${ref_fasta_file.baseName}.fa.fai", glob: false
 
     """
+    mkdir $PWD/index
     /usr/bin/env perl ${params.bin_dir}/samtools_reference_index.pl \
         --reffile=\$PWD/${ref_fasta_file} \
-        --outdir=\$PWD \
+        --outdir=\$PWD/index \
         --samtools_bin_dir=${samtools_bin_dir} \
         ${params.other_args}
     """
