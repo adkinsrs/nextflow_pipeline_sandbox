@@ -12,12 +12,14 @@ process run_samtools_reference_index {
     outdir = "${workDir}/samtools_reference_index"
     publishDir outdir, mode: 'symlink', failOnError: true
 
+    executor 'sge'
+    memory = '5 GB'
+
     input:
         path ref_fasta_file
         val samtools_bin_dir
     output:
         path "${ref_fasta_file.baseName}.fa.fai", glob: false
-
 
     """
     /usr/bin/env perl ${params.bin_dir}/samtools_reference_index.pl \
@@ -29,8 +31,9 @@ process run_samtools_reference_index {
 }
 
 workflow samtools_reference_index {
-    take: ref_fasta_file
-    take: samtools_bin_dir
+    take:
+        ref_fasta_file
+        samtools_bin_dir
     main:
         run_samtools_reference_index(
             ref_fasta_file
@@ -44,7 +47,6 @@ workflow samtools_reference_index {
 workflow {
     ref_fasta_file = channel.fromPath(params.ref_fasta_file, checkIfExists:true, followLinks:true)
     samtools_bin_dir = channel.fromPath(params.samtools_bin_dir, checkIfExists:true, followLinks:true)
-
 
     samtools_reference_index(
         ref_fasta_file
