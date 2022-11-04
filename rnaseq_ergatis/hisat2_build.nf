@@ -25,7 +25,7 @@ process run_hisat2_build {
         val ref_fasta_file.baseName, emit: prefix
 
     // script makes output directory if it does not exist
-    // Script excepts full path for ref fasta file
+    // Script expects full path for ref fasta file
     """
     /usr/bin/env perl ${params.bin_dir}/hisat2_build.pl \
         --reffile=\$PWD/${ref_fasta_file} \
