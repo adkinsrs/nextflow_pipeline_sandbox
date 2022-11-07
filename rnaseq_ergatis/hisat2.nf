@@ -56,10 +56,16 @@ process run_hisat {
     outdir = "${workDir}/hisat2"
     publishDir outdir, mode: 'symlink', failOnError: true
 
+    executor 'sge'
+    memory '5 GB'
+
     input:
-        path ref_fasta_file
-        path hisat2_bin_dir
-        path samtools_bin_dir
+        tuple val(seq_file1), val(seq_file2)
+        path hisat2_build_index
+        val hisat2_build_prefix
+        val hisat2_bin_dir
+        val samtools_bin_dir
+
     output:
         path "*.accepted_hits.bam",  glob: true, emit: bam_files
         path "*.accepted_hits.sam",  glob: true, emit: sam_files
@@ -67,10 +73,11 @@ process run_hisat {
 
     """
     /usr/bin/env perl ${params.bin_dir}/hisat2.pl \
-        --seq1file=/local/projects/RNASEQ/Projects_starting_Jan2022/XNLON/rnaseq/ergatis/Pipeline_20220930.102827/raw_reads/S9_S10_1_1_sequence.txt.gz,/local/projects/RNASEQ/Projects_starting_Jan2022/XNLON/rnaseq/ergatis/Pipeline_20220930.102827/raw_reads/S9_S10_1_2_sequence.txt.gz \
-        --seq2file='/local/projects/RNASEQ/Projects_starting_Jan2022/XNLON/rnaseq/ergatis/Pipeline_20220930.102827/raw_reads/S9_S10_2_1_sequence.txt.gz,/local/projects/RNASEQ/Projects_starting_Jan2022/XNLON/rnaseq/ergatis/Pipeline_20220930.102827/raw_reads/S9_S10_2_2_sequence.txt.gz' \
-        --hisat2_index_dir=/local/projects/RNASEQ/Projects_starting_Jan2022/XNLON/rnaseq/ergatis/output_repository/hisat2_build/13365834737_reference/i1/g1 --prefix=Homo_sapiens.GRCh38.dna.toplevel \
-        --outdir=/local/projects/RNASEQ/Projects_starting_Jan2022/XNLON/rnaseq/ergatis/output_repository/hisat2/13365834737_alignment/i1/g10 \
+        --seq1file=${seq_file1} \
+        --seq2file=${seq_file2} \
+        --hisat2_index_dir=${hisat2_build_index} \
+        --prefix=${hisat2_build_prefix} \
+        --outdir=\$PWD \
         --mismatch-penalties=${params.mismatch_penalties} \
         --softclip-penalties=${params.softclip_penalties} \
         --read-gap-penalties=${params.read_gap_penalties} \
@@ -88,8 +95,6 @@ process run_hisat {
         --minins=${params.min_fragment_len} \
         --maxins=${params.max_fragment_len} \
         --no-unal=${params.suppress_unalignments} \
-        --outdir=\$PWD \
-        --prefix=${ref_fasta_file.baseName} \
         --num-threads=${params.num_threads} \
         --hisat2_bin_dir=${hisat2_bin_dir} \
         --samtools_bin_dir=${samtools_bin_dir} \
@@ -99,10 +104,25 @@ process run_hisat {
 }
 
 workflow hisat2 {
-    take: ref_fasta_file
+    take:
+        paired_files
+        hisat2_build_index
+        hisat2_build_prefix
+        hisat2_bin_dir
+        samtools_bin_dir
     main:
-        run_hisat2(ref_fasta_file)
-    emit: run_hisat2.out
+        run_hisat2(
+            paired_files
+                .splitText()
+                .splitCsv(sep:"\t", header:false)
+                .map { row -> tuple(row[0], row[1]) }
+            , hisat2_build_index
+            , hisat2_build_prefix
+            , hisat2_bin_dir
+            , samtools_bin_dir
+            )
+    emit:
+        run_hisat2.out.bam_files
 }
 
 
@@ -117,16 +137,16 @@ workflow {
     }
 
     hisat2_index_ch = channel.fromPath(params.hisat2_index_dir, checkIfExists:true, followLinks:true)
-    hisat2_index_prefix_ch = ""
+    hisat2_index_prefix_ch = channel.value(params.hisat2_prefix, checkIfExists:true, followLinks:true)
 
     hisat2_bin_dir = channel.fromPath(params.hisat2_bin_dir, checkIfExists:true, followLinks:true)
     samtools_bin_dir = channel.fromPath(params.samtools_bin_dir, checkIfExists:true, followLinks:true)
 
-
     hisat2 (
-            paired_input_file_ch
-            , hisat2_bin_dir
-            , samtools_bin_dir
+        paired_input_file_ch
+        , hisat2_index_ch
+        , hisat2_index_prefix_ch
+        , hisat2_bin_dir
+        , samtools_bin_dir
         )
-}
 }

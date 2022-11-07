@@ -6,35 +6,8 @@ nextflow.enable.dsl=2
 include {hisat2_build} from "./hisat2_build"
 include {samtools_reference_index} from "./samtools_reference_index"
 include {create_paired_list_file} from "./create_paired_list_file"
-
-/*
-process hisat2_build {
-    input:
-        path ref_fasta_file
-        val hisat2_bin_dir
-    output:
-        path hisat2_build_index
-        val prefix
-
-}
-
-process samtools_reference_index {
-    input:
-        path ref_fasta_file
-        val samtools_bin_dir
-    output:
-        path samtools_index
-
-}
-
-process create_paired_list_file {
-    input:
-        path list_file1
-        path list_file2
-    output:
-        path paired_list_file
-}
-*/
+include {fastqc_stats} from "./fastqc_stats"
+include {hisat2} from "./hisat2"
 
 workflow {
     // In Ergatis, we could pass a file, a .list of files, or a directory.
@@ -47,6 +20,7 @@ workflow {
 
     hisat2_bin_dir = channel.fromPath(params.hisat2_bin_dir, checkIfExists:true, followLinks:true)
     samtools_bin_dir = channel.fromPath(params.samtools_bin_dir, checkIfExists:true, followLinks:true)
+    fastqc_bin_dir = channel.fromPath(params.fastqc_bin_dir, checkIfExists:true, followLinks:true)
 
     main:
         hisat2_build(
@@ -60,14 +34,19 @@ workflow {
         create_paired_list_file(
             list_file1_ch
             , list_file2_ch
-        )
-        fastqc_stats(create_paired_list_file.out)
+            )
+        fastqc_stats(
+            create_paired_list_file.out
+            , fastqc_bin_dir
+            )
         hisat2(
             create_paired_list_file.out
-            , hisat2_build_index
+            , hisat2_build.index
+            , hisat2_build.prefix
             , hisat2_bin_dir
             , samtools_bin_dir
             )
+
         /*samtools_file_convert() // sorted by position
         samtools_file_convert() // sorted by name
         samtools_alignment_stats()

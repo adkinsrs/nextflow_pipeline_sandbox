@@ -13,7 +13,7 @@ process run_samtools_reference_index {
     publishDir outdir, mode: 'symlink', failOnError: true
 
     executor 'sge'
-    memory = '5 GB'
+    memory '5 GB'
 
     input:
         path ref_fasta_file
