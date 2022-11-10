@@ -70,7 +70,6 @@ process run_hisat2 {
         path "*.accepted_hits.bam",  glob: true, emit: bam_files
         path "*.accepted_hits.sam",  glob: true, emit: sam_files
 
-
     """
     /usr/bin/env perl ${params.bin_dir}/hisat2.pl \
         --seq1file=${seq_file1} \
@@ -84,7 +83,7 @@ process run_hisat2 {
         --ref-gap-penalties=${params.ref_gap_penalties} \
         --min-intronlen=${params.min_intron_len} \
         --max-intronlen=${params.max_intron_len} \
-        --score-min=${params.score_min} \
+        --score-min=${params.min_alignment_score} \
         --pen-cansplice=${params.pen_can_splice} \
         --pen-noncansplice=${params.pen_noncan_splice} \
         --pen-canintronlen=${params.pen_can_intron_len} \

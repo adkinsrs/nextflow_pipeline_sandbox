@@ -35,10 +35,12 @@ workflow {
             list_file1_ch
             , list_file2_ch
             )
+        /* NOTE: This tool fails sometimes
         fastqc_stats(
             create_paired_list_file.out
             , fastqc_bin_dir
             )
+        */
         hisat2(
             create_paired_list_file.out
             , hisat2_build.out.index
@@ -47,8 +49,19 @@ workflow {
             , samtools_bin_dir
             )
 
-        /*samtools_file_convert() // sorted by position
-        samtools_file_convert() // sorted by name
+        samtools_file_convert(
+            hisar2.out.bam_files
+            , "position"
+            , ""
+            , samtools_bin_dir
+            )   // sorted by position
+        samtools_file_convert(
+            hisar2.out.bam_files
+            , "name"
+            , ""
+            , samtools_bin_dir
+            )   // sorted by name
+        /*
         samtools_alignment_stats()
         align_hisat2_stats()
         percent_mapped_stats()
