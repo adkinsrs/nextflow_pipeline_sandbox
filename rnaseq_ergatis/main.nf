@@ -8,6 +8,39 @@ include {samtools_reference_index} from "./samtools_reference_index"
 include {create_paired_list_file} from "./create_paired_list_file"
 include {fastqc_stats} from "./fastqc_stats"
 include {hisat2} from "./hisat2"
+include {samtools_file_convert} from "./samtools_file_convert"
+
+workflow samtools_file_convert_position {
+    take:
+        input_file
+        samtools_bin_dir
+    main:
+        samtools_file_convert(
+            input_file
+            , "position"
+            , ""
+            , samtools_bin_dir
+            )   // sorted by position
+    emit:
+        bam_list = samtools_file_convert.out.bam_list
+        bam_sorted_by_position = samtools_file_convert.out.bam_sorted_by_position
+
+}
+workflow samtools_file_convert_name {
+    take:
+        input_file
+        samtools_bin_dir
+    main:
+        samtools_file_convert(
+            input_file
+            , "name"
+            , ""
+            , samtools_bin_dir
+            )   // sorted by name
+    emit:
+        bam_list = samtools_file_convert.out.bam_list
+        bam_sorted_by_name = samtools_file_convert.out.bam_sorted_by_name
+}
 
 workflow {
     // In Ergatis, we could pass a file, a .list of files, or a directory.
@@ -49,16 +82,12 @@ workflow {
             , samtools_bin_dir
             )
 
-        samtools_file_convert(
-            hisar2.out.bam_files
-            , "position"
-            , ""
+        samtools_file_convert_position(
+            hisat2.out.bam_files
             , samtools_bin_dir
             )   // sorted by position
-        samtools_file_convert(
-            hisar2.out.bam_files
-            , "name"
-            , ""
+        samtools_file_convert_name(
+            hisat2.out.bam_files
             , samtools_bin_dir
             )   // sorted by name
         /*

@@ -30,31 +30,31 @@ process run_samtools_file_convert {
         path "*.sorted_by_position.sam", glob: true, emit: sam_sorted_by_position
         path "*.sorted_by_name.sam", glob: true, emit: sam_sorted_by_name
 
-    // string of options for file conversion (eg : 123)
-    // 1 - BAM to sorted BAM, 2 - sorted BAM to indexed BAM, 3 - BAM to SAM, and 4 - SAM to BAM
-    // "12" - sort by position, "13" - sort by name
-    options = ""
-    if (sortby == "position") {
-        options = "12"
-    } else if (sortby == "name") {
-        options = "13"
-        if (!(params.samtools_sort_params =~ /-n/)) {
-            params.samtools_sort_params += ' -n'
+    script:
+        // string of options for file conversion (eg : 123)
+        // 1 - BAM to sorted BAM, 2 - sorted BAM to indexed BAM, 3 - BAM to SAM, and 4 - SAM to BAM
+        // "12" - sort by position, "13" - sort by name
+        options = ""
+        if (sortby == "position") {
+            options = "12"
+        } else if (sortby == "name") {
+            options = "13"
+            if (!(params.samtools_sort_params =~ /-n/)) {
+                params.samtools_sort_params += ' -n'
+            }
         }
-    }
-
-    """
-    /usr/bin/env perl ${params.bin_dir}/samtools_file_convert.pl \
-        --infile=\$PWD/${input_file} \
-        --infile_format=${input_file.extension}
-        --options=${options}
-        --reffile=\$PWD/${ref_fasta_file} \
-        --outdir=\$PWD \
-        --samtools_bin_dir=${samtools_bin_dir} \
-        --samtools_view_options=${params.samtools_view_options} \
-        --samtools_sort_options=${params.samtools_sort_options} \
-        ${params.other_args}
-    """
+        """
+        /usr/bin/env perl ${params.bin_dir}/samtools_file_convert.pl \
+            --infile=\$PWD/${input_file} \
+            --infile_format=${input_file.extension}
+            --options=${options}
+            --reffile=\$PWD/${ref_fasta_file} \
+            --outdir=\$PWD \
+            --samtools_bin_dir=${samtools_bin_dir} \
+            --samtools_view_options=${params.samtools_view_options} \
+            --samtools_sort_options=${params.samtools_sort_options} \
+            ${params.other_args}
+        """
 }
 
 workflow samtools_file_convert {
@@ -71,12 +71,12 @@ workflow samtools_file_convert {
             , samtools_bin_dir
             )
     emit:
-        run_samtools_file_convert.out.bam_list
-        run_samtools_file_convert.out.bam_sorted_by_position
-        run_samtools_file_convert.out.bam_sorted_by_name
-        run_samtools_file_convert.out.sam_list
-        run_samtools_file_convert.out.sam_sorted_by_position
-        run_samtools_file_convert.out.sam_sorted_by_name
+        bam_list = run_samtools_file_convert.out.bam_list
+        bam_sorted_by_position = run_samtools_file_convert.out.bam_sorted_by_position
+        bam_sorted_by_name = run_samtools_file_convert.out.bam_sorted_by_name
+        sam_list = run_samtools_file_convert.out.sam_list
+        sam_sorted_by_position = run_samtools_file_convert.out.sam_sorted_by_position
+        sam_sorted_by_name = run_samtools_file_convert.out.sam_sorted_by_name
 
 }
 
@@ -93,8 +93,8 @@ workflow {
 
     samtools_reference_index(
         file_chunks_ch
-        ref_fasta_file
         , sortby
+        , ref_fasta_file
         , samtools_bin_dir
         )
 }
