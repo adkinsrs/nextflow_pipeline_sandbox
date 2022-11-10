@@ -5,8 +5,8 @@ nextflow.enable.dsl=2
 
 // These can be overwritten by passing --<param_name> in the command line
 
-params.samtools_view_params = ""
-params.samtools_sort_params = ""
+params.samtools_view_opts = ""
+params.samtools_sort_opts = ""
 //use --v for verbose summary
 params.other_args = '--v'
 
@@ -35,12 +35,13 @@ process run_samtools_file_convert {
         // 1 - BAM to sorted BAM, 2 - sorted BAM to indexed BAM, 3 - BAM to SAM, and 4 - SAM to BAM
         // "12" - sort by position, "13" - sort by name
         options = ""
+        sort_opts = params.samtools_sort_opts
         if (sortby == "position") {
             options = "12"
         } else if (sortby == "name") {
             options = "13"
-            if (!(params.samtools_sort_params =~ /-n/)) {
-                params.samtools_sort_params += ' -n'
+            if (!(params.samtools_sort_opts =~ /-n/)) {
+                sort_opts = sort_opts +  ' -n'
             }
         }
         """
@@ -51,8 +52,8 @@ process run_samtools_file_convert {
             --reffile=\$PWD/${ref_fasta_file} \
             --outdir=\$PWD \
             --samtools_bin_dir=${samtools_bin_dir} \
-            --samtools_view_options=${params.samtools_view_options} \
-            --samtools_sort_options=${params.samtools_sort_options} \
+            --samtools_view_options=${params.samtools_view_opts} \
+            --samtools_sort_options=${sort_opts} \
             ${params.other_args}
         """
 }

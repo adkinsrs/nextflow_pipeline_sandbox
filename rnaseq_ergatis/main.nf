@@ -22,7 +22,6 @@ workflow samtools_file_convert_position {
             , samtools_bin_dir
             )   // sorted by position
     emit:
-        bam_list = samtools_file_convert.out.bam_list
         bam_sorted_by_position = samtools_file_convert.out.bam_sorted_by_position
 
 }
@@ -38,7 +37,6 @@ workflow samtools_file_convert_name {
             , samtools_bin_dir
             )   // sorted by name
     emit:
-        bam_list = samtools_file_convert.out.bam_list
         bam_sorted_by_name = samtools_file_convert.out.bam_sorted_by_name
 }
 
@@ -90,8 +88,11 @@ workflow {
             hisat2.out.bam_files
             , samtools_bin_dir
             )   // sorted by name
+        samtools_alignment_stats(
+            samtools_file_convert_position.out
+            , samtools_bin_dir
+        )
         /*
-        samtools_alignment_stats()
         align_hisat2_stats()
         percent_mapped_stats()
         bam2bigwig()
