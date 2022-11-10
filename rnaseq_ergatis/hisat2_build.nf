@@ -49,8 +49,8 @@ workflow hisat2_build {
             , hisat2_bin_dir
             )
     emit:
-        run_hisat2_build.out.index
-        run_hisat2_build.out.prefix
+        index = run_hisat2_build.out.index
+        prefix = run_hisat2_build.out.prefix
 }
 
 

@@ -22,7 +22,7 @@ process run_samtools_reference_index {
         path "index/${ref_fasta_file.baseName}.fa.fai", glob: false
 
     """
-    mkdir $PWD/index
+    mkdir \$PWD/index
     /usr/bin/env perl ${params.bin_dir}/samtools_reference_index.pl \
         --reffile=\$PWD/${ref_fasta_file} \
         --outdir=\$PWD/index \

@@ -41,8 +41,8 @@ workflow {
             )
         hisat2(
             create_paired_list_file.out
-            , hisat2_build.index
-            , hisat2_build.prefix
+            , hisat2_build.out.index
+            , hisat2_build.out.prefix
             , hisat2_bin_dir
             , samtools_bin_dir
             )

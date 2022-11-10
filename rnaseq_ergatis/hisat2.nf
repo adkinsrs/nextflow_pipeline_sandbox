@@ -52,7 +52,7 @@ params.other_params = ''
 //use --v for verbose summary
 params.other_args = '--v'
 
-process run_hisat {
+process run_hisat2 {
     outdir = "${workDir}/hisat2"
     publishDir outdir, mode: 'symlink', failOnError: true
 
@@ -122,7 +122,7 @@ workflow hisat2 {
             , samtools_bin_dir
             )
     emit:
-        run_hisat2.out.bam_files
+       bam_files = run_hisat2.out.bam_files
 }
 
 
