@@ -110,6 +110,10 @@ workflow hisat2 {
         hisat2_bin_dir
         samtools_bin_dir
     main:
+        paired_files
+            .splitText()
+            .splitCsv(sep:"\t", header:false)
+            .map { row -> tuple(row[0], row[1]) }
         run_hisat2(
             paired_files
                 .splitText()

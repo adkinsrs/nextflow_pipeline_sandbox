@@ -5,10 +5,10 @@ nextflow.enable.dsl=2
 
 // These can be overwritten by passing --<param_name> in the command line
 
-params.samtools_view_params = ""
-params.samtools_sort_params = ""
+params.samtools_view_opts = ""
+params.samtools_sort_opts = ""
 //use --v for verbose summary
-params.other_args = '--v'
+params.other_args = '-v'
 
 process run_samtools_file_convert {
     outdir = "${workDir}/samtools_file_convert"
@@ -18,41 +18,43 @@ process run_samtools_file_convert {
     memory '5 GB'
 
     input:
-        path input_file
+        // using path throws "too many symlink levels" error
+        val input_file
         val sortby
         val ref_fasta_file
         val samtools_bin_dir
     output:
         path "*.bam", glob: true, emit: bam_list
-        path "*.sorted_by_position.bam", glob: true, emit: bam_sorted_by_position
-        path "*.sorted_by_name.bam", glob: true, emit: bam_sorted_by_name
-        path "*.sam", glob: true, emit: sam_list
-        path "*.sorted_by_position.sam", glob: true, emit: sam_sorted_by_position
-        path "*.sorted_by_name.sam", glob: true, emit: sam_sorted_by_name
+        path "*.sorted_by_position.bam", glob: true, optional: true, emit: bam_sorted_by_position
+        path "*.sorted_by_name.bam", glob: true, optional: true, emit: bam_sorted_by_name
+        path "*.sam", glob: true, optional: true, emit: sam_list
+        path "*.sorted_by_position.sam", glob: true, optional: true, emit: sam_sorted_by_position
+        path "*.sorted_by_name.sam", glob: true, optional: true, emit: sam_sorted_by_name
 
     script:
         // string of options for file conversion (eg : 123)
         // 1 - BAM to sorted BAM, 2 - sorted BAM to indexed BAM, 3 - BAM to SAM, and 4 - SAM to BAM
         // "12" - sort by position, "13" - sort by name
         options = ""
+        sort_opts = params.samtools_sort_opts
         if (sortby == "position") {
             options = "12"
         } else if (sortby == "name") {
             options = "13"
-            if (!(params.samtools_sort_params =~ /-n/)) {
-                params.samtools_sort_params += ' -n'
+            if (!(params.samtools_sort_opts =~ /-n/)) {
+                sort_opts = sort_opts + ' -n'
             }
         }
         """
         /usr/bin/env perl ${params.bin_dir}/samtools_file_convert.pl \
-            --infile=\$PWD/${input_file} \
-            --infile_format=${input_file.extension}
-            --options=${options}
-            --reffile=\$PWD/${ref_fasta_file} \
+            --infile=${input_file} \
+            --infile_format=${input_file.extension} \
+            --options=${options} \
+            --reffile=${ref_fasta_file} \
             --outdir=\$PWD \
             --samtools_bin_dir=${samtools_bin_dir} \
-            --samtools_view_options=${params.samtools_view_options} \
-            --samtools_sort_options=${params.samtools_sort_options} \
+            --samtools_view_options=${params.samtools_view_opts} \
+            --samtools_sort_options=${params.samtools_sort_opts} \
             ${params.other_args}
         """
 }
@@ -91,7 +93,7 @@ workflow {
     sortby = channel.fromValue(params.samtools_sortby)
     samtools_bin_dir = channel.fromPath(params.samtools_bin_dir, checkIfExists:true, followLinks:true)
 
-    samtools_reference_index(
+    samtools_file_convert(
         file_chunks_ch
         , sortby
         , ref_fasta_file
