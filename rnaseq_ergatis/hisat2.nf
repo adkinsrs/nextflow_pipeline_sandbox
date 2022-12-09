@@ -61,10 +61,10 @@ process run_hisat2 {
 
     input:
         tuple val(seq_file1), val(seq_file2)
-        path hisat2_build_index
-        val hisat2_build_prefix
-        val hisat2_bin_dir
-        val samtools_bin_dir
+        each path(hisat2_build_index)
+        each hisat2_build_prefix
+        each hisat2_bin_dir
+        each samtools_bin_dir
 
     output:
         path "*.accepted_hits.bam",  glob: true, emit: bam_files
@@ -103,6 +103,7 @@ process run_hisat2 {
 }
 
 workflow hisat2 {
+    seq_files_ch = channel.fromList()
     take:
         paired_files
         hisat2_build_index
@@ -110,10 +111,11 @@ workflow hisat2 {
         hisat2_bin_dir
         samtools_bin_dir
     main:
-        paired_files
-            .splitText()
-            .splitCsv(sep:"\t", header:false)
-            .map { row -> tuple(row[0], row[1]) }
+
+        // See https://github.com/nextflow-io/nextflow/issues/1531 for how to address this
+        // Alternately, omit "combine" stuff, leave tuple as is in process, and make everything else "each val"
+        // I chose the latter option for simplicity
+
         run_hisat2(
             paired_files
                 .splitText()
@@ -125,7 +127,7 @@ workflow hisat2 {
             , samtools_bin_dir
             )
     emit:
-       bam_files = run_hisat2.out.bam_files
+       bam_files = run_hisat2.out.bam_files.collect()
 }
 
 

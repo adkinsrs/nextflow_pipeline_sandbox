@@ -9,35 +9,36 @@ include {create_paired_list_file} from "./create_paired_list_file"
 include {fastqc_stats} from "./fastqc_stats"
 include {hisat2} from "./hisat2"
 include {samtools_file_convert} from "./samtools_file_convert"
+include {samtools_alignment_stats} from "./samtools_alignment_stats"
 
 workflow samtools_file_convert_position {
     take:
-        input_file
+        input_files
         samtools_bin_dir
     main:
         samtools_file_convert(
-            input_file
+            input_files
             , "position"
             , ""
             , samtools_bin_dir
             )   // sorted by position
     emit:
-        bam_sorted_by_position = samtools_file_convert.out.bam_sorted_by_position
+        bam_sorted_by_position = samtools_file_convert.out.bam_sorted_by_position.collect()
 
 }
 workflow samtools_file_convert_name {
     take:
-        input_file
+        input_files
         samtools_bin_dir
     main:
         samtools_file_convert(
-            input_file
+            input_files
             , "name"
             , ""
             , samtools_bin_dir
             )   // sorted by name
     emit:
-        bam_sorted_by_name = samtools_file_convert.out.bam_sorted_by_name
+        bam_sorted_by_name = samtools_file_convert.out.bam_sorted_by_name.collect()
 }
 
 workflow {
@@ -66,7 +67,8 @@ workflow {
             list_file1_ch
             , list_file2_ch
             )
-        /* NOTE: This tool fails sometimes
+        // NOTE: This tool fails sometimes
+        /*
         fastqc_stats(
             create_paired_list_file.out
             , fastqc_bin_dir
@@ -79,7 +81,6 @@ workflow {
             , hisat2_bin_dir
             , samtools_bin_dir
             )
-
         samtools_file_convert_position(
             hisat2.out.bam_files
             , samtools_bin_dir

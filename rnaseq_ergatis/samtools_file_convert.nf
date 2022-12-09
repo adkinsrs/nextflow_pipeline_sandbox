@@ -19,7 +19,7 @@ process run_samtools_file_convert {
 
     input:
         // using path throws "too many symlink levels" error
-        val input_file
+        each input_file
         val sortby
         val ref_fasta_file
         val samtools_bin_dir
@@ -61,30 +61,31 @@ process run_samtools_file_convert {
 
 workflow samtools_file_convert {
     take:
-        input_file
+        input_files
         sortby
         ref_fasta_file
         samtools_bin_dir
     main:
         run_samtools_file_convert(
-            input_file
+            input_files
             , sortby
             , ref_fasta_file
             , samtools_bin_dir
             )
     emit:
-        bam_list = run_samtools_file_convert.out.bam_list
-        bam_sorted_by_position = run_samtools_file_convert.out.bam_sorted_by_position
-        bam_sorted_by_name = run_samtools_file_convert.out.bam_sorted_by_name
-        sam_list = run_samtools_file_convert.out.sam_list
-        sam_sorted_by_position = run_samtools_file_convert.out.sam_sorted_by_position
-        sam_sorted_by_name = run_samtools_file_convert.out.sam_sorted_by_name
+        bam_list = run_samtools_file_convert.out.bam_list.collect()
+        bam_sorted_by_position = run_samtools_file_convert.out.bam_sorted_by_position.collect()
+        bam_sorted_by_name = run_samtools_file_convert.out.bam_sorted_by_name.collect()
+        sam_list = run_samtools_file_convert.out.sam_list.collect()
+        sam_sorted_by_position = run_samtools_file_convert.out.sam_sorted_by_position.collect()
+        sam_sorted_by_name = run_samtools_file_convert.out.sam_sorted_by_name.collect()
 
 }
 
 
 // Workflow to call this as standalone
 workflow {
+    // In Ergatis, we could pass a file, a .list of files, or a directory.
     file_chunks_ch = channel.fromPath(params.fasta_file, checkIfExists:false, followLinks:true)
     if (! file_chunks_ch) {
         file_chunks_ch = channel.fromPath(params.fasta_list, checkIfExists:true, followLinks:true).splitText()

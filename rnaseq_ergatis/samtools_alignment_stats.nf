@@ -16,14 +16,14 @@ process run_samtools_alignment_stats {
     memory '5 GB'
 
     input:
-        path bam_file
+        each bam_file
         val samtools_bin_dir
     output:
         path "*.mapstats.txt", glob: true
 
     """
     /usr/bin/env perl ${params.bin_dir}/samtools_alignment_stats.pl \
-        --infile=\$PWD/${bam_file} \
+        --infile=${bam_file} \
         --outdir=\$PWD \
         --samtools_bin_dir=${samtools_bin_dir} \
         ${params.other_args}
@@ -32,14 +32,14 @@ process run_samtools_alignment_stats {
 
 workflow samtools_alignment_stats {
     take:
-        bam_file
+        bam_files
         samtools_bin_dir
     main:
         run_samtools_alignment_stats(
-            bam_file
+            bam_files
             , samtools_bin_dir
             )
-    emit: run_samtools_alignment_stats.out
+    emit: run_samtools_alignment_stats.out.collect()
 }
 
 

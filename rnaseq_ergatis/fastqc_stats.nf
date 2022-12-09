@@ -16,7 +16,7 @@ process run_fastqc_stats {
     input:
         // comma-separated paths are perfectly valid input, which means using "path" types to stage is not possible
         tuple val(seq_file1), val(seq_file2)
-        val fastqc_bin_dir
+        each fastqc_bin_dir
     output:
         path "*.per_base_quality.png", glob: true, emit: per_base_quality
         path "*.sequence_length_distribution.png", glob: true, emit: sequence_length_distribution
@@ -44,8 +44,8 @@ workflow fastqc_stats {
             , fastqc_bin_dir
             )
     emit:
-        base_quality = run_fastqc_stats.out.per_base_quality
-        seq_len_distribution = run_fastqc_stats.out.sequence_length_distribution
+        base_quality = run_fastqc_stats.out.per_base_quality.collect()
+        seq_len_distribution = run_fastqc_stats.out.sequence_length_distribution.collect()
 }
 
 
